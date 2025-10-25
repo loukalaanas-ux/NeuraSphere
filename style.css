@@ -1,0 +1,111 @@
+:root{
+  --bg:#07070b;
+  --card:#0f1115;
+  --muted:#9aa3b2;
+  --accent1:#7c4dff; /* purple */
+  --accent2:#00a7ff; /* blue */
+  --glass: rgba(255,255,255,0.03);
+  --radius:14px;
+  --max-width:1100px;
+  --blur:12px;
+  font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+}
+
+/* Reset & basics */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:linear-gradient(180deg,var(--bg), #050507 140%);
+  color:#e6eef8;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  transition:background .25s linear, color .2s linear;
+  font-size:16px;
+}
+
+/* RTL support (will be toggled by JS by setting dir="rtl") */
+[dir="rtl"] { direction: rtl; }
+[dir="rtl"] .nav-left { order:2; }
+[dir="rtl"] .nav-right { order:1; }
+
+/* Layout */
+.nav{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px 24px;
+  max-width:var(--max-width);
+  margin:16px auto;
+  gap:12px;
+}
+.logo svg{color:var(--accent1); opacity:0.95}
+.brand{display:flex;flex-direction:column;line-height:1}
+.brand-main{font-weight:600;letter-spacing:0.2px}
+.tagline{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* Nav Right */
+.nav-right ul{display:flex;gap:8px;align-items:center;list-style:none;padding:0;margin:0}
+.nav-right .nav-link{color:var(--muted);text-decoration:none;padding:8px 10px;border-radius:8px;font-weight:500}
+.nav-right .nav-link:hover{color:#fff;background:linear-gradient(90deg, rgba(124,77,255,0.08), rgba(0,167,255,0.04))}
+
+/* Controls */
+.controls{display:flex;gap:8px;align-items:center}
+.btn{
+  background:transparent;border:1px solid transparent;padding:8px 12px;border-radius:10px;font-weight:600;cursor:pointer;
+}
+.btn.primary{
+  background:linear-gradient(90deg,var(--accent1),var(--accent2));
+  color:#fff;border:0;box-shadow:0 6px 18px rgba(0,0,0,0.6);
+}
+.btn.ghost{
+  background:var(--glass); color:var(--muted);
+  border:1px solid rgba(255,255,255,0.03);
+}
+.btn.small{padding:6px 8px;font-size:14px}
+
+/* Main pages */
+.main, .page{padding:24px}
+.page{display:none;padding:32px 24px}
+.page.active{display:block}
+.container{max-width:var(--max-width);margin:0 auto;padding:24px}
+.narrow{max-width:720px}
+
+/* Hero */
+.hero{display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start;max-width:var(--max-width);margin:24px auto}
+.hero h1{font-size:36px;margin:0;font-weight:700;letter-spacing:0.4px}
+.hero-sub{color:var(--muted);margin-top:12px}
+.hero-actions{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
+.hero-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:16px;border-radius:12px;backdrop-filter: blur(var(--blur));box-shadow: 0 8px 30px rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.03)}
+
+/* Chat demo */
+.ai-demo{display:flex;flex-direction:column;gap:12px}
+.chat-log{min-height:120px;max-height:220px;overflow:auto;padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(0,0,0,0.2), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02)}
+.message{padding:8px 10px;margin-bottom:8px;border-radius:8px;max-width:85%}
+.msg-user{background:linear-gradient(90deg,var(--accent2), rgba(0,167,255,0.12));color:#001;align-self:flex-end}
+.msg-bot{background:linear-gradient(90deg, rgba(124,77,255,0.12), rgba(0,0,0,0.09));color:#dbe9ff;align-self:flex-start}
+.chat-form{display:flex;gap:8px;margin-top:6px}
+.chat-form input{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+
+/* Grid features */
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:18px}
+article{background:var(--card);padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
+
+/* Forms */
+.form-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;gap:12px}
+.form-card label{display:flex;flex-direction:column;font-weight:600;color:var(--muted);gap:8px}
+.form-card input, .form-card textarea{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
+
+/* Footer */
+.site-footer{margin-top:30px;padding:24px;border-top:1px solid rgba(255,255,255,0.03);color:var(--muted);text-align:center}
+
+/* Responsive */
+@media (max-width:980px){
+  .hero{grid-template-columns:1fr; padding:12px}
+  .nav{padding:12px}
+  .nav-right ul{display:none}
+}
+
+/* Small touches */
+.note{color:var(--muted);font-size:14px}
+.small{color:var(--muted);font-size:13px}

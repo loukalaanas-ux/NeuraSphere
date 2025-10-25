@@ -1,0 +1,3 @@
+[build]
+  publish = "."  # ينشر الملفات في جذر المشروع
+  functions = "netlify" # تحديد أن مجلد الوظائف هو 'netlify'
