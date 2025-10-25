@@ -1,81 +1,68 @@
-// gemini/index.js (Netlify Function)
-const { GoogleGenAI } = require("@google/genai");
+// netlify/index.js - وظيفة Netlify التي تتصل بـ Gemini
 
-// الحصول على المفتاح من متغيرات بيئة Netlify
-// هذا المتغير سنقوم بتعيينه يدوياً لاحقاً في لوحة تحكم Netlify
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const { GoogleGenAI } = require('@google/genai');
 
-if (!GEMINI_API_KEY) {
-  return {
-    statusCode: 500,
-    body: JSON.stringify({ error: "Missing GEMINI_API_KEY environment variable." }),
-  };
-}
+// تهيئة Gemini AI باستخدام مفتاح API المخزن كمتغير بيئة (Environment Variable)
+const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
 
-const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+// اسم النموذج (Model) الذي سنستخدمه
+const MODEL_NAME = "gemini-2.5-flash"; 
 
-// الدالة الرئيسية لوظيفة Netlify
-exports.handler = async (event, context) => {
-  // ------------------------------------------
-  // 1. استخراج المدخلات
-  // ------------------------------------------
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
-  }
+exports.handler = async (event) => {
+    // يجب أن تكون الدالة POST
+    if (event.httpMethod !== 'POST') {
+        return {
+            statusCode: 405,
+            body: JSON.stringify({ error: 'Method Not Allowed' }),
+        };
+    }
 
-  const data = JSON.parse(event.body);
-  const message = data.message;
-  const learningLanguage = data.learningLanguage || "English";
+    try {
+        const body = JSON.parse(event.body);
+        const { message, learningLanguage } = body;
 
-  if (!message || message.length < 3) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: "الرسالة يجب أن تحتوي على 3 أحرف على الأقل." }),
-    };
-  }
+        if (!message) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: 'Missing message parameter' }),
+            };
+        }
 
-  // ------------------------------------------
-  // 2. إعداد التعليمات لنموذج Gemini
-  // ------------------------------------------
-  const systemInstruction = `أنت مدرس لغة آلي متقدم ومحترف. 
-    مهمتك هي مساعدة المستخدم على تعلم اللغة ${learningLanguage}.
+        // إعداد موجه (Prompt) لإخبار الذكاء الاصطناعي بدوره
+        const prompt = `أنت معلم لغة إنجليزية خبير. مهمتك هي: 1. تصحيح جملة المستخدم. 2. الرد على المستخدم باللغة الإنجليزية في نفس سياق سؤاله. 3. ترجمة الرد الإنجليزي إلى اللغة العربية. لغة التعلم المطلوبة هي: ${learningLanguage}. سؤال المستخدم: "${message}"`;
 
-    القواعد التي يجب أن تتبعها في كل رد:
-    1. الرد يجب أن يكون بالكامل **باللغة ${learningLanguage}**.
-    2. يجب أن تجيب على سؤال المستخدم أو تعلق على جملته.
-    3. يجب أن تقدم **تصحيحاً أو اقتراحاً** لتحسين الجملة أو السؤال إذا كان المستخدم قد ارتكب خطأ نحوي أو لغوي، ضع التصحيح بخط **عريض**.
-    4. اختم ردك **بسؤال مفتوح** متعلق بالموضوع لتشجيع المستخدم على المتابعة والممارسة.`;
+        const response = await ai.models.generateContent({
+            model: MODEL_NAME,
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+        });
 
-  // ------------------------------------------
-  // 3. طلب الرد من نموذج Gemini Flash
-  // ------------------------------------------
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: [
-        { role: "user", parts: [{ text: message }] }
-      ],
-      config: {
-        systemInstruction: systemInstruction,
-      },
-    });
+        const botResponse = response.text.trim();
+        
+        // قد تحتاج إلى تحليل الرد للحصول على الرد العربي والإنجليزي (حسب تنسيق الرد من Gemini)
+        // في هذا الكود، سنرسل الرد كاملاً (قد يتضمن الإنجليزي والعربي والتصحيح)
 
-    // ------------------------------------------
-    // 4. إرجاع الرد
-    // ------------------------------------------
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        response: response.text,
-        language: learningLanguage,
-      }),
-    };
+        return {
+            statusCode: 200,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                response: botResponse,
+                language: 'English', // نعتبر لغة الرد هي لغة التعلم المطلوبة
+            }),
+        };
 
-  } catch (error) {
-    console.error("Error communicating with Gemini API:", error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "تعذر الاتصال بخدمة الذكاء الاصطناعي." }),
-    };
-  }
+    } catch (error) {
+        console.error("AI Function Error:", error);
+        
+        // رسالة خطأ للمستخدم للمساعدة في التشخيص
+        const userError = (error.message && error.message.includes('API_KEY_INVALID')) ? 
+            "خطأ: مفتاح Gemini API Key غير صالح أو مفقود. (تحقق من متغير البيئة)" :
+            "حدث خطأ غير معروف في معالجة طلب الذكاء الاصطناعي.";
+
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: userError }),
+        };
+    }
 };
